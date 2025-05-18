@@ -122,7 +122,29 @@ class FreeCurrencyApiConverter extends \Magento\Directory\Model\Currency\Import\
             return $data;
         }
 
+        $meta = $response['meta'];
+
+
         $response = $response['data'];
+
+        $lastUpdatedAt = $meta['last_updated_at'] ?? null;
+        if (!$lastUpdatedAt) {
+            $this->_messages[] = __('No last_updated_at field in API response.');
+
+            $data[$currencyFrom] = $this->makeEmptyResponse($currenciesTo);
+            return $data;
+        }
+
+        $lastUpdatedDate = (new \DateTimeImmutable($lastUpdatedAt))->setTime(0, 0);
+        $today = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))->setTime(0, 0);
+        $yesterday = $today->modify('-1 day');
+
+        if ($lastUpdatedDate != $today && $lastUpdatedDate != $yesterday) {
+            $this->_messages[] = __('Currency rates are outdated (last updated: %1).', $lastUpdatedAt);
+
+            $data[$currencyFrom] = $this->makeEmptyResponse($currenciesTo);
+            return $data;
+        }
         // $response = [ 
         //     'AUD' => ['code' => 'AUD', 'value' => 2.0528424423 ],
         //     'KRW' => ['code' => 'KRW', 'value' => 1324.0528424423 ],
