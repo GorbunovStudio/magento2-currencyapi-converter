@@ -160,7 +160,7 @@ class FreeCurrencyApiConverter extends \Magento\Directory\Model\Currency\Import\
                     $data[$currencyFrom][$to] = null;
                 } else {
                     $data[$currencyFrom][$to] = $this->_numberFormat(
-                        (double)$response[$to]['value']
+                        (float)$response[$to]['value']
                     );
                 }
             }
